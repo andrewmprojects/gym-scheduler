@@ -71,6 +71,43 @@ function getExercises(session, visitCount) {
   }));
 }
 
+function computeNextWorkoutDate(history, skipDays) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  let base;
+  if (history.length === 0) {
+    base = new Date(today);
+  } else {
+    base = new Date(history[0].date);
+    base.setHours(0, 0, 0, 0);
+    base.setDate(base.getDate() + 2);
+    if (base < today) base = new Date(today);
+  }
+  const result = new Date(base);
+  result.setDate(result.getDate() + skipDays);
+  return result;
+}
+
+function buildTimeline(nextWorkoutDate, currentIndex, days = 14) {
+  const entries = [];
+  let workoutCount = 0;
+  for (let i = 0; i < days; i++) {
+    const date = new Date(nextWorkoutDate);
+    date.setDate(date.getDate() + i);
+    if (i % 2 === 0) {
+      entries.push({
+        date,
+        type: "workout",
+        sessionIndex: (currentIndex + workoutCount) % SESSIONS.length,
+      });
+      workoutCount++;
+    } else {
+      entries.push({ date, type: "rest" });
+    }
+  }
+  return entries;
+}
+
 function SessionCard({ session, visitCount, mini = false }) {
   if (!session) return null;
   const exercises = getExercises(session, visitCount);
