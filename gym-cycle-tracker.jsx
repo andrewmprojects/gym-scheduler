@@ -131,21 +131,16 @@ export default function GymCycleTracker() {
   const [justDone, setJustDone] = useState(false);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const idxR = await window.storage.get("gym_cycle_index");
-        const visR = await window.storage.get("gym_session_visits");
-        const hisR = await window.storage.get("gym_cycle_history");
-        if (idxR) setCurrentIndex(parseInt(idxR.value, 10));
-        if (visR) setVisits(JSON.parse(visR.value));
-        if (hisR) setHistory(JSON.parse(hisR.value));
-      } catch (_) {}
-      setLoaded(true);
-    }
-    load();
+    const idxR = localStorage.getItem("gym_cycle_index");
+    const visR = localStorage.getItem("gym_session_visits");
+    const hisR = localStorage.getItem("gym_cycle_history");
+    if (idxR) setCurrentIndex(parseInt(idxR, 10));
+    if (visR) setVisits(JSON.parse(visR));
+    if (hisR) setHistory(JSON.parse(hisR));
+    setLoaded(true);
   }, []);
 
-  async function markDone() {
+  function markDone() {
     const session = SESSIONS[currentIndex];
     const exercises = getExercises(session, visits[session.id]);
     const entry = {
@@ -163,21 +158,21 @@ export default function GymCycleTracker() {
     setJustDone(true);
     setTimeout(() => setJustDone(false), 2000);
     try {
-      await window.storage.set("gym_cycle_index", String(nextIndex));
-      await window.storage.set("gym_session_visits", JSON.stringify(newVisits));
-      await window.storage.set("gym_cycle_history", JSON.stringify(newHistory));
+      localStorage.setItem("gym_cycle_index", String(nextIndex));
+      localStorage.setItem("gym_session_visits", JSON.stringify(newVisits));
+      localStorage.setItem("gym_cycle_history", JSON.stringify(newHistory));
     } catch (_) {}
   }
 
-  async function reset() {
+  function reset() {
     const fresh = { UA: 0, LA: 0, UB: 0, LB: 0 };
     setCurrentIndex(0);
     setVisits(fresh);
     setHistory([]);
     try {
-      await window.storage.set("gym_cycle_index", "0");
-      await window.storage.set("gym_session_visits", JSON.stringify(fresh));
-      await window.storage.set("gym_cycle_history", JSON.stringify([]));
+      localStorage.setItem("gym_cycle_index", "0");
+      localStorage.setItem("gym_session_visits", JSON.stringify(fresh));
+      localStorage.setItem("gym_cycle_history", JSON.stringify([]));
     } catch (_) {}
   }
 
