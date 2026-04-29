@@ -129,14 +129,17 @@ export default function GymCycleTracker() {
   const [history, setHistory] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [justDone, setJustDone] = useState(false);
+  const [skipDays, setSkipDays] = useState(0);
 
   useEffect(() => {
     const idxR = localStorage.getItem("gym_cycle_index");
     const visR = localStorage.getItem("gym_session_visits");
     const hisR = localStorage.getItem("gym_cycle_history");
+    const skipR = localStorage.getItem("gym_skip_days");
     if (idxR) setCurrentIndex(parseInt(idxR, 10));
     if (visR) setVisits(JSON.parse(visR));
     if (hisR) setHistory(JSON.parse(hisR));
+    if (skipR) setSkipDays(parseInt(skipR, 10));
     setLoaded(true);
   }, []);
 
@@ -155,12 +158,22 @@ export default function GymCycleTracker() {
     setVisits(newVisits);
     setHistory(newHistory);
     setCurrentIndex(nextIndex);
+    setSkipDays(0);
     setJustDone(true);
     setTimeout(() => setJustDone(false), 2000);
     try {
       localStorage.setItem("gym_cycle_index", String(nextIndex));
       localStorage.setItem("gym_session_visits", JSON.stringify(newVisits));
       localStorage.setItem("gym_cycle_history", JSON.stringify(newHistory));
+      localStorage.setItem("gym_skip_days", "0");
+    } catch (_) {}
+  }
+
+  function skipDay() {
+    const next = skipDays + 1;
+    setSkipDays(next);
+    try {
+      localStorage.setItem("gym_skip_days", String(next));
     } catch (_) {}
   }
 
