@@ -159,6 +159,45 @@ function SessionCard({ session, visitCount, mini = false }) {
   );
 }
 
+const DAY_NAMES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+function UpcomingTimeline({ timeline }) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      {timeline.map((entry, i) => {
+        if (entry.type === "rest") {
+          return (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 10px", background: "#111", borderRadius: 2, opacity: 0.5 }}>
+              <div style={{ minWidth: 36 }}>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, color: "#333", letterSpacing: 1 }}>{DAY_NAMES[entry.date.getDay()]}</div>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: "#333", lineHeight: 1.1 }}>{entry.date.getDate()}</div>
+              </div>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#2a2a2a", letterSpacing: 1 }}>— REST —</div>
+            </div>
+          );
+        }
+        const session = SESSIONS[entry.sessionIndex];
+        const isToday = entry.date.getTime() === today.getTime();
+        return (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", background: isToday ? "#1a1a1a" : "#161616", borderLeft: `3px solid ${session.color}`, borderRadius: 2 }}>
+            <div style={{ minWidth: 36 }}>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, color: isToday ? session.color : "#555", letterSpacing: 1 }}>{DAY_NAMES[entry.date.getDay()]}</div>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: isToday ? session.color : "#666", lineHeight: 1.1 }}>{entry.date.getDate()}</div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: isToday ? session.color : "#666", letterSpacing: 1 }}>{session.name.toUpperCase()}</div>
+              {isToday && <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, color: "#555", marginTop: 1 }}>TODAY</div>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function GymCycleTracker() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visits, setVisits] = useState({ UA: 0, LA: 0, UB: 0, LB: 0 });
@@ -226,7 +265,10 @@ export default function GymCycleTracker() {
   }
 
   const currentSession = SESSIONS[currentIndex];
-  const nextSession = SESSIONS[(currentIndex + 1) % SESSIONS.length];
+  const timeline = buildTimeline(
+    computeNextWorkoutDate(history, skipDays),
+    currentIndex
+  );
 
   if (!loaded) {
     return (
@@ -284,11 +326,23 @@ export default function GymCycleTracker() {
         >
           {justDone ? "✓  LOGGED" : "MARK AS DONE"}
         </button>
+        <button
+          onClick={skipDay}
+          style={{
+            width: "100%", marginTop: 6, padding: "9px",
+            background: "none", color: "#555",
+            border: "1px solid #222", borderRadius: 2,
+            fontFamily: "'DM Mono', monospace", fontSize: 11,
+            letterSpacing: 2, cursor: "pointer", textTransform: "uppercase",
+          }}
+        >
+          Skip Day — Push Schedule +1
+        </button>
 
-        {/* Up next */}
+        {/* Upcoming */}
         <div style={{ marginTop: 24 }}>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: 3, color: "#444", textTransform: "uppercase", marginBottom: 10 }}>After That</div>
-          <SessionCard session={nextSession} visitCount={visits[nextSession.id]} mini />
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, letterSpacing: 3, color: "#444", textTransform: "uppercase", marginBottom: 10 }}>Upcoming</div>
+          <UpcomingTimeline timeline={timeline} />
         </div>
 
         {/* History */}
