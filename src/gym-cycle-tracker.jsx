@@ -98,9 +98,8 @@ function buildTimeline(nextWorkoutDate, currentIndex, days = 14) {
       entries.push({
         date,
         type: "workout",
-        sessionIndex: (currentIndex + workoutCount) % SESSIONS.length,
+        sessionIndex: (currentIndex + workoutCount++) % SESSIONS.length,
       });
-      workoutCount++;
     } else {
       entries.push({ date, type: "rest" });
     }
