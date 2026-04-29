@@ -1,5 +1,5 @@
-import GymCycleTracker from '../gym-cycle-tracker.jsx'
+import GymCycleTracker from "./gym-cycle-tracker.jsx";
 
 export default function App() {
-  return <GymCycleTracker />
+  return <GymCycleTracker />;
 }
