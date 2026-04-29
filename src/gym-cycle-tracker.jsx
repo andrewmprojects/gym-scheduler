@@ -257,10 +257,12 @@ export default function GymCycleTracker() {
     setCurrentIndex(0);
     setVisits(fresh);
     setHistory([]);
+    setSkipDays(0);
     try {
       localStorage.setItem("gym_cycle_index", "0");
       localStorage.setItem("gym_session_visits", JSON.stringify(fresh));
       localStorage.setItem("gym_cycle_history", JSON.stringify([]));
+      localStorage.setItem("gym_skip_days", "0");
     } catch (_) {}
   }
 
